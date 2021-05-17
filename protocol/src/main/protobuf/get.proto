@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package primes.protocol;
+
+service Primes {
+    rpc GetPrimes(GetPrimesRequest) returns (stream GetPrimesResponse) {}
+}
+
+message GetPrimesRequest {
+    uint32 up_to = 1;
+}
+
+message GetPrimesResponse {
+    // The input is at most 2^32, the nth prime number is roughly n(log n)
+    // (from: https://en.wikipedia.org/wiki/Prime_number_theorem#Approximations_for_the_nth_prime_number)
+    // because 2^32(log 2^32) is significantly lower than 2^64 the result should fit here.
+    uint64 prime = 1;
+}
