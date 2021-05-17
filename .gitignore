@@ -1,0 +1,7 @@
+.idea
+.metals
+.bloop
+.vscode
+target/
+.bsp/
+proto-defs.iml
