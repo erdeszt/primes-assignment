@@ -1,5 +1,7 @@
-lazy val tapirVersion = "0.17.19"
-lazy val circeVersion = "0.13.0"
+val circeVersion = "0.13.0"
+val sttpVersion  = "3.3.3"
+val tapirVersion = "0.17.19"
+val zioVersion   = "1.0.6"
 
 lazy val commonSettings = Seq(
   version := "0.1",
@@ -64,14 +66,22 @@ lazy val protocol = (project in file("protocol"))
 
 lazy val proxyServer = (project in file("proxy-server"))
   .dependsOn(protocol)
+  .dependsOn(primeServer % Test)
   .settings(commonSettings)
   .settings(scalacSettings)
   .settings(
     name := "proxy-server",
     libraryDependencies ++= Seq(
       "io.grpc" % "grpc-netty" % "1.37.1",
-      "io.d11" %% "zhttp" % "1.0.0.0-RC16"
-    )
+      "io.d11" %% "zhttp" % "1.0.0.0-RC16",
+      "dev.zio" %% "zio-test" % zioVersion % Test,
+      "dev.zio" %% "zio-test-sbt" % zioVersion % Test,
+      "dev.zio" %% "zio-test-junit" % zioVersion % Test,
+      "com.softwaremill.sttp.client3" %% "core" % sttpVersion % Test,
+      "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test,
+      "com.softwaremill.sttp.client3" %% "zio" % sttpVersion % Test
+    ),
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
   )
 
 lazy val primeServer = (project in file("prime-server"))
