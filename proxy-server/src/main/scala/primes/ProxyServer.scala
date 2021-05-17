@@ -3,6 +3,7 @@ package primes
 import io.grpc.ManagedChannelBuilder
 import primes.protocol.get.GetPrimesRequest
 import primes.protocol.get.ZioGet._
+import primes.protocol.Limits
 import scalapb.zio_grpc.ZManagedChannel
 import zhttp.http._
 import zhttp.service.Server
@@ -26,7 +27,11 @@ object ProxyServer extends zio.App {
   val app = Http.collectM[Request] { case Method.GET -> Root / "prime" / rawNumber =>
     val primes = for {
       number <- ZIO.effect(rawNumber.toInt).mapError(InvalidNumberFormatError(_))
-      validatedNumber <- ZIO.cond(number > 0, number, NumberOutOfRangeError(number))
+      validatedNumber <- ZIO.cond(
+        number > 0 && number < Limits.MAX_NUMBER_OF_PRIMES,
+        number,
+        NumberOutOfRangeError(number)
+      )
     } yield PrimesClient
       .getPrimes(GetPrimesRequest(validatedNumber))
       .flatMap(response => ZStream.fromIterable(response.prime.toString.getBytes) ++ separator.take(1))
