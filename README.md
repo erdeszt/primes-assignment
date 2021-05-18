@@ -1,0 +1,9 @@
+# Prime service assignment
+
+## Design choices:
+
+- For communication I chose gRPC because I read an article recently about zio-grpc and the code looked nice so I wanted to try it anyway and this assignment was a good opportunity. I don't have prior experience with either Thrift or gRPC.
+- For the rest API, I originally wanted to go with `tapir` because I like the declerative style and automatically generated clients and documentation but it doesn't support zio streams so I looked at `http4s` but that only supports zio streams via conversion to fs2 stream which seemed like a hassle so I eventually I went with `zio-http` it's a new framework, no documentation available but they had enough examples that I could put this together. Not ideal, hopefully this issue gets fixed soon: https://github.com/softwaremill/tapir/issues/714
+- I've precalculated the primes up to a predefined limit at startup, this limit could be dropped and we could calculate the first `2^32` primes(maybe even during build) and that should cover the whole input domain of `uint32` for the cost of 4G memory. This list should however ideally be stored outside of the program(db, file, cache)
+- I've added a short delay in the stream because it looked cooler when I was testing with `curl`
+- For testing I just start up both servers in background processes and call the proxy to test the behaviour(shutting them down when all tests are done or execution is interrupted by a failure). This could be done in docker instead but I don't have a working docker setup on my machine right now so I didn't bother doing it. I had to write small client for calling the api which would be automatically provided by `tapir` if I could use it with zio streams :(
